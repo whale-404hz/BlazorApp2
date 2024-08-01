@@ -1,0 +1,46 @@
+﻿@page "/departments/create"
+
+@using Microsoft.EntityFrameworkCore
+@using BlazorApp2.Models
+@inject IDbContextFactory<BlazorApp2.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h4>Departments</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Departments" OnValidSubmit="AddDepartments" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" />
+            <div class="mb-3">
+                <label for="name" class="form-label">Name:</label> 
+                <InputText id="name" @bind-Value="Departments.Name" class="form-control" /> 
+                <ValidationMessage For="() => Departments.Name" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/departments">Back to List</a>
+</div>
+
+@code {
+
+    [SupplyParameterFromForm]
+    public Departments Departments { get; set; } = new();
+
+    // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
+    public async Task AddDepartments()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Departments.Add(Departments);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/departments");
+    }
+}

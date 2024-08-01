@@ -1,0 +1,56 @@
+﻿@page "/semesters/create"
+
+@using Microsoft.EntityFrameworkCore
+@using BlazorApp2.Models
+@inject IDbContextFactory<BlazorApp2.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h4>Semesters</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Semesters" OnValidSubmit="AddSemesters" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" />
+            <div class="mb-3">
+                <label for="name" class="form-label">Name:</label> 
+                <InputText id="name" @bind-Value="Semesters.Name" class="form-control" /> 
+                <ValidationMessage For="() => Semesters.Name" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="startdate" class="form-label">StartDate:</label> 
+                <InputDate id="startdate" @bind-Value="Semesters.StartDate" class="form-control" /> 
+                <ValidationMessage For="() => Semesters.StartDate" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="enddate" class="form-label">EndDate:</label> 
+                <InputDate id="enddate" @bind-Value="Semesters.EndDate" class="form-control" /> 
+                <ValidationMessage For="() => Semesters.EndDate" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/semesters">Back to List</a>
+</div>
+
+@code {
+
+    [SupplyParameterFromForm]
+    public Semesters Semesters { get; set; } = new();
+
+    // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
+    public async Task AddSemesters()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Semesters.Add(Semesters);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/semesters");
+    }
+}

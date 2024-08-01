@@ -1,0 +1,25 @@
+﻿@page "/majors"
+
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using BlazorApp2.Models
+@inject IDbContextFactory<BlazorApp2.Data.ApplicationDbContext> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="majors/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="DbFactory.CreateDbContext().Majors.Include(m=>m.Department)">
+    <PropertyColumn Property="majors => majors.Name" />
+    <PropertyColumn Property="majors => majors.Department.Name"Title="Department"/>
+
+    <TemplateColumn Context="majors">
+        <a href="@($"majors/edit?id={majors.Id}")">Edit</a> |
+        <a href="@($"majors/details?id={majors.Id}")">Details</a> |
+        <a href="@($"majors/delete?id={majors.Id}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>

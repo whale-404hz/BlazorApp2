@@ -1,0 +1,101 @@
+﻿@page "/Majors/edit"
+
+@using Microsoft.EntityFrameworkCore
+@using BlazorApp2.Models
+@inject IDbContextFactory<BlazorApp2.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h4>Majors</h4>
+<hr />
+@if (Majors is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Majors" OnValidSubmit="UpdateMajors" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <input type="hidden" name="Majors.Id" value="@Majors.Id" />
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name:</label>
+                    <InputText id="name" @bind-Value="Majors.Name" class="form-control" />
+                    <ValidationMessage For="() => Majors.Name" class="text-danger" />
+                </div>
+
+                     <div class="mb-3">
+       <label for="departmentid" class="form-label">Department:</label>
+       <InputSelect id="departmentid" @bind-Value="Majors.DepartmentId" class="form-control">
+                        @foreach (var department in Departments)
+                        {
+                        <option value="@department.Id">@department.Name</option>
+                        }
+        </InputSelect>
+    </div>     
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/majors">Back to List</a>
+</div>
+
+@code {
+    public List<Departments> Departments { get; set; } = new();
+    [SupplyParameterFromQuery]
+    public int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    public Majors? Majors { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Majors ??= await context.Majors.FirstOrDefaultAsync(m => m.Id == Id);
+        Departments = await context.Departments.ToListAsync();
+        if (Majors is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more details, see https://aka.ms/RazorPagesCRUD.
+    public async Task UpdateMajors()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Majors!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!MajorsExists(Majors!.Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/majors");
+    }
+
+    bool MajorsExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Majors.Any(e => e.Id == id);
+    }
+}
